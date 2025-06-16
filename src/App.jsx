@@ -1,9 +1,8 @@
 import { useState } from "react";
-import Expense from "./Component/Expense";
-import Income from "./Component/Income";
 import Navbar from "./Component/Navbar";
 import Stats from "./Component/Stats";
 import SubmissionForm from "./Component/SubmissionForm";
+import Transaction from "./Component/Transaction";
 
 const App = () => {
   const defaultData = {
@@ -71,17 +70,19 @@ const App = () => {
           <div className="lg:col-span-2">
             <Stats data={data} />
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-8">
-              <Expense
+              <Transaction
                 data={data}
                 setFormData={setFormData}
                 setEditingId={setEditingId}
                 handleDeleted={handleDeleted}
+                type={"expense"}
               />
-              <Income
+              <Transaction
                 data={data}
                 setFormData={setFormData}
                 setEditingId={setEditingId}
                 handleDeleted={handleDeleted}
+                type={"income"}
               />
             </div>
           </div>
