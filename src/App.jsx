@@ -1,19 +1,12 @@
 import { useState } from "react";
+import { defaultData } from "../utils/data";
 import Navbar from "./Component/Navbar";
 import Stats from "./Component/Stats";
 import SubmissionForm from "./Component/SubmissionForm";
 import Transaction from "./Component/Transaction";
 
 const App = () => {
-  const defaultData = {
-    id: crypto.randomUUID(),
-    type: "expense",
-    amount: 234,
-    category: "Health",
-    date: "2025-06-11",
-  };
-
-  const [data, setData] = useState([defaultData]);
+  const [data, setData] = useState(defaultData);
   const [editingId, setEditingId] = useState(null);
 
   const [formData, setFormData] = useState({

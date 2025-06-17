@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { expenseCategoryData, incomeCategoryData } from "../../utils/data";
 
 const Transaction = ({
   data,
@@ -9,13 +10,55 @@ const Transaction = ({
 }) => {
   const [isShortOpen, setIsShortOpen] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState([]);
+  const [filteredData, setFilteredData] = useState([]);
+  const [sortOrder, setSortOrder] = useState("");
 
-  const transactions = data.filter((e) => e.type === type);
+  const transactions = data.filter((transaction) => transaction.type === type);
+  const filteredTransaction =
+    selectedCategories.length > 0 || sortOrder !== ""
+      ? filteredData
+      : transactions;
+
+  const transactionCategories =
+    type === "expense" ? expenseCategoryData : incomeCategoryData;
 
   const handleEdit = (id) => {
     const editableData = transactions.find((e) => e.id === id);
     setFormData(editableData);
     setEditingId(id);
+  };
+
+  const handleCheckboxChange = (e) => {
+    const value = e.target.value;
+    const isChecked = e.target.checked;
+
+    let updatedCategories = [];
+
+    if (isChecked) {
+      updatedCategories = [...selectedCategories, value];
+    } else {
+      updatedCategories = selectedCategories.filter((cat) => cat !== value);
+    }
+
+    setSelectedCategories(updatedCategories);
+    setFilteredData(data.filter((e) => updatedCategories.includes(e.category)));
+  };
+
+  const handleSortList = (sortType) => {
+    setSortOrder(sortType);
+
+    const sortedList = [...filteredTransaction].sort((a, b) => {
+      if (sortType === "asc") {
+        return a.amount - b.amount; // Low to High
+      } else if (sortType === "desc") {
+        return b.amount - a.amount; // High to Low
+      } else {
+        return 0; // No sorting
+      }
+    });
+
+    setFilteredData(sortedList);
   };
 
   return (
@@ -100,24 +143,24 @@ const Transaction = ({
                 tabindex="-1"
               >
                 <div className="py-1" role="none">
-                  <a
-                    href="#"
+                  <button
+                    onClick={() => handleSortList("asc")}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all"
                     role="menuitem"
                     tabindex="-1"
                     id="menu-item-0"
                   >
                     Low to High
-                  </a>
-                  <a
-                    href="#"
+                  </button>
+                  <button
+                    onClick={() => handleSortList("desc")}
                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-all"
                     role="menuitem"
                     tabindex="-1"
                     id="menu-item-0"
                   >
                     High to Low
-                  </a>
+                  </button>
                 </div>
               </div>
             )}
@@ -170,30 +213,21 @@ const Transaction = ({
                 id="filter-dropdown2"
               >
                 <div className="py-1" role="none">
-                  <label className="inline-flex items-center px-4 py-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox h-4 w-4 rounded-md text-gray-600"
-                      id="filter-option-1"
-                    />
-                    <span className="ml-2">Education</span>
-                  </label>
-                  <label className="inline-flex items-center px-4 py-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox h-4 w-4 rounded-md text-gray-600"
-                      id="filter-option-2"
-                    />
-                    <span className="ml-2">Food</span>
-                  </label>
-                  <label className="inline-flex items-center px-4 py-2 text-sm text-gray-700">
-                    <input
-                      type="checkbox"
-                      className="form-checkbox h-4 w-4 rounded-md text-gray-600"
-                      id="filter-option-3"
-                    />
-                    <span className="ml-2">Health</span>
-                  </label>
+                  {transactionCategories.map((category) => (
+                    <label
+                      key={category}
+                      className="inline-flex items-center px-4 py-2 text-sm text-gray-700"
+                    >
+                      <input
+                        type="checkbox"
+                        value={category}
+                        checked={selectedCategories.includes(category)}
+                        onChange={handleCheckboxChange}
+                        className="form-checkbox h-4 w-4 rounded-md text-gray-600"
+                      />
+                      <span className="ml-2">{category}</span>
+                    </label>
+                  ))}
                 </div>
               </div>
             )}
@@ -204,7 +238,7 @@ const Transaction = ({
 
       <div className="p-4 divide-y">
         {/* <!-- Expense Row 1 --> */}
-        {transactions.map((data) => (
+        {filteredTransaction.map((data) => (
           <div
             key={data.id}
             className="flex justify-between items-center py-2 relative group cursor-pointer"
